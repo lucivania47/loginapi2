@@ -14,48 +14,59 @@ namespace Exo.WebApi.Repositories
             _context = context;
         }
 
-        public Usuario Login(string email, string senha)
-        {
-            return _context.Usuarios.FirstOrDefault(u => u.Email == email && u.Senha == senha);
-        }
-
-        public List<Usuario> Listar()
+        // Método para listar todos os usuários
+        public IEnumerable<Usuario> Listar()
         {
             return _context.Usuarios.ToList();
         }
 
-        public void Cadastrar(Usuario usuario)
-        {
-            _context.Usuarios.Add(usuario);
-            _context.SaveChanges();
-        }
-
+        // Método para buscar um usuário por ID
         public Usuario BuscaPorId(int id)
         {
             return _context.Usuarios.Find(id);
         }
 
-        public void Atualizar(int id, Usuario usuario)
+        // Método para adicionar um novo usuário
+        public void Adicionar(Usuario usuario)
         {
-            Usuario usuarioBuscado = _context.Usuarios.Find(id);
-
-            if (usuarioBuscado != null)
+            if (usuario != null)
             {
-                usuarioBuscado.Email = usuario.Email;
-                usuarioBuscado.Senha = usuario.Senha;
+                _context.Usuarios.Add(usuario);
+                _context.SaveChanges();
             }
-
-            _context.Usuarios.Update(usuarioBuscado);
-            _context.SaveChanges();
         }
 
+        // Método para atualizar um usuário existente
+        public void Atualizar(int id, Usuario usuarioAtualizado)
+        {
+            Usuario usuarioExistente = _context.Usuarios.Find(id);
+            if (usuarioExistente != null && usuarioAtualizado != null)
+            {
+                usuarioExistente.Nome = usuarioAtualizado.Nome;
+                usuarioExistente.Email = usuarioAtualizado.Email;
+                usuarioExistente.Senha = usuarioAtualizado.Senha;
+
+                // Atualizando o estado da entidade
+                _context.Entry(usuarioExistente).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                _context.SaveChanges();
+            }
+        }
+
+        // Método para deletar um usuário por ID
         public void Deletar(int id)
         {
-            Usuario usuarioBuscado = _context.Usuarios.Find(id);
-            _context.Usuarios.Remove(usuarioBuscado);
-            _context.SaveChanges();
+            Usuario usuario = _context.Usuarios.Find(id);
+            if (usuario != null)
+            {
+                _context.Usuarios.Remove(usuario);
+                _context.SaveChanges();
+            }
         }
 
+        // Método de login para autenticação do usuário
+        public Usuario Login(string email, string senha)
+        {
+            return _context.Usuarios.FirstOrDefault(u => u.Email == email && u.Senha == senha);
+        }
     }
 }
-
